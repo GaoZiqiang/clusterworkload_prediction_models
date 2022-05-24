@@ -49,7 +49,7 @@ def test(data_pth, resource, test_len, model_pth, batch_size):
         MSE = mean_squared_error(y_pred_, targets_)
         MAE = mean_absolute_error(y_pred_, targets_)
         RMSE = sqrt(mean_squared_error(y_pred_, targets_))
-        MAPE = mean_absolute_percentage_error(y_pred_, targets_)
+        MAPE = mean_absolute_percentage_error(targets_, y_pred_)
 
         # print('MSE Value= ', MSE)
         # print('MAE Value= ', MAE)
@@ -75,8 +75,8 @@ if __name__ == '__main__':
     ### test
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
-    test_len = 200
-    model_name = 'auto_encoder_cpu_epoch_20(CNN).pth'
+    test_len = 120
+    model_name = 'hidden_size16_cpu_epoch_15(CNN).pth'
     model_pth = '../output/' + model_name
     batch_size = 20
 

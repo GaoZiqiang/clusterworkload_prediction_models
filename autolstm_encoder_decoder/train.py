@@ -19,12 +19,12 @@ from utils import *
 def train(data_pth, resource, batch_size, epochs, save_pth):
     # 得到数据
     x, y = get_train_data(data_pth, resource)
-    test_data = x[:20]
-    y_real = y[:20]
+    test_data = x[:120]
+    y_real = y[:120]
     train_loader = Data.DataLoader(
         dataset=Data.TensorDataset(x, y),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
         batch_size=batch_size,  # 每块的大小
-        shuffle=False,  # 要不要打乱数据 (打乱比较好)
+        shuffle=False,  # 要不要打乱数据 (打乱比较好?)
         num_workers=2,  # 多进程（multiprocess）来读数据
     )
     # embed()
@@ -39,6 +39,9 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
     for i in range(epochs):
         print("===>Epoch: ", i + 1)
         for seq, labels in train_loader:
+            # print("in train(), seq.shape = ", seq.shape)
+            # if seq.shape[0] != 20:
+            #     continue
             optimizer.zero_grad()
             # embed()
             y_pred = model(seq)  # 压缩维度：得到输出，并将维度为1的去除
@@ -50,7 +53,7 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
             optimizer.step()
             # print("Train Step:", i, " loss: ", single_loss)
         # 每20次，输出一次前20个的结果，对比一下效果
-        if (i + 1) % 5 == 0:
+        if (i + 1) % 1 == 0:
             # embed()
             y_pred = model(test_data)  # 压缩维度：得到输出，并将维度为1的去除
             y_pred = y_pred[:, -1, :]
@@ -63,10 +66,12 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
             # test_data_ = test_data.detach().numpy()
             y_pred_ = y_pred.detach().numpy()
 
+            # print("nn.MSELoss= ", loss_function(y_pred.squeeze(), labels))
             print('MSE Value= ', mean_squared_error(y_pred_, y_real))
+            # print('MSE2 Value= ', mean_squared_error(y_real, y_pred_))
             print('MAE Value= ', mean_absolute_error(y_pred_, y_real))
             print('RMSE Value= ', sqrt(mean_squared_error(y_pred_, y_real)))
-            print('MAPE Value= ', mean_absolute_percentage_error(y_pred_, y_real))
+            print('MAPE Value= ', mean_absolute_percentage_error(y_real, y_pred_))
 
         # Visualising the results
         # if i == epochs - 1:
@@ -85,7 +90,7 @@ if __name__ == '__main__':
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
     batch_size = 20
-    epochs = 100
-    save_pth = '../output/' + 'auto_encoder_' + resource + '_epoch_' + str(epochs) + '(CNN).pth'
+    epochs = 1
+    save_pth = '../output/' + 'slidwin60_hidden_size16_' + resource + '_epoch_' + str(epochs) + '(CNN).pth'
 
     train(data_pth, resource, batch_size, epochs, save_pth)

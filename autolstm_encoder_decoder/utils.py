@@ -32,15 +32,16 @@ def get_train_data():
 def get_train_data(path, resource):
     # Importing the training set
     dataset_train = pd.read_csv(path, error_bad_lines=False, sep="\t")
+    # embed()
     training_set = []
     if resource == "cpu":
-        training_set = dataset_train.iloc[0:3325, 2:4].values / 100# 使用cpu mem预测cpu
+        training_set = dataset_train.iloc[0:3325, [2,8]].values# 使用cpu disk预测cpu
     elif resource == "mem":
-        training_set = dataset_train.iloc[0:3325, 3:4].values / 100
+        training_set = dataset_train.iloc[0:3325, 3:4].values
     elif resource == "disk":
-        training_set = dataset_train.iloc[0:3325, 8:9].values / 100
+        training_set = dataset_train.iloc[0:3325, 8:9].values
     elif resource == "net":
-        training_set = dataset_train.iloc[0:3325, 4:5].values / 100
+        training_set = dataset_train.iloc[0:3325, 4:5].values
     else:
         print("unknown resouce type, exit")
         return
@@ -48,14 +49,15 @@ def get_train_data(path, resource):
     # normalization
     sc = MinMaxScaler(feature_range=(0, 1))
     training_set_scaled = sc.fit_transform(training_set)
-
+    # embed()
     # sliding window
     # Creating a data structure with 60 timesteps and 1 output
     X_train = []
     y_train = []
     # sliding window = 120
+    # sliding window = 60
     for i in range(120, 3320):
-        X_train.append(training_set_scaled[i - 120:i, :])# 输入为120*2
+        X_train.append(training_set_scaled[i - 120:i, :])# 输入为120*3
         y_train.append(training_set_scaled[i, 0])# 输出为1*1
     X_train, y_train = np.array(X_train), np.array(y_train)
 
