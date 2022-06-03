@@ -78,14 +78,14 @@ if __name__ == '__main__':
     ### test
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
-    test_len = 240
-    model_name = 'MAPE0.04895193_epoch299.pth'
-    model_pth = '../output/' + model_name
+    test_len = 20
+    model_name = 'preseq150_MAPE0.09985609_epoch320.pth'
+    model_pth = '../import_execellent_models/different_prediction_sequence_len/' + model_name
     batch_size = 20
 
     MSE, MAE, RMSE, MAPE = test(data_pth, resource, test_len, model_pth, batch_size)
     print(MSE, MAE, RMSE, MAPE)
     with open('../result_in_txt/results_train.txt', 'a') as file:
         file.write(
-            'Date %s | model_name = %s | MSE = %.5f | MAE: %.5f | RMSE: %.5f | MAPE: %.5f |\n' % (
+            'Date %s | model_name = %s | MSE = %.7f | MAE: %.7f | RMSE: %.7f | MAPE: %.7f |\n' % (
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), model_name, MSE, MAE, RMSE, MAPE))

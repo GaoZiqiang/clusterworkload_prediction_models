@@ -9,13 +9,14 @@ from utils import *
 from IPython import embed
 
 class LstmAutoEncoder(nn.Module):
-    def __init__(self, num_features=2, hidden_size=16, hidden_layers=2, output_features=2, batch_size=20):
+    def __init__(self, num_features=2, hidden_size=16, hidden_layers=2, window_size=60, output_features=2, batch_size=20):
         super(LstmAutoEncoder, self).__init__()
 
         self.num_features = num_features# 输入特征数 比如只使用cpu和mem两个特征
         self.hidden_size = hidden_size# 隐藏层size
         self.output_features = output_features# 输出特征数/预测特征数
         self.hidden_layers = hidden_layers# 隐藏层的个数
+        self.window_size = window_size# 滑动窗口长度
         self.num_directions = 1# 单向LSTM
         self.batch_size = batch_size
         # 添加一层CNN
@@ -39,7 +40,7 @@ class LstmAutoEncoder(nn.Module):
         # input_x的shape
         # batch_size sliding_window features_num
         # input_x = input_x.view(20, 120, 2)
-        input_x = input_x.view(self.batch_size, 120, self.num_features)# batch_size slidingwindow feature数
+        input_x = input_x.view(self.batch_size, self.window_size, self.num_features)# batch_size slidingwindow feature数
         # encoder
         # 输入形参
         # self.num_directions * self.num_layers self.batch_size self.hidden_size

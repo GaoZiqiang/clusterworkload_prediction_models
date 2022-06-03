@@ -99,7 +99,7 @@ def get_train_data(path, resource):
     # embed()
     training_set = []
     if resource == "cpu":
-        training_set = dataset_train.iloc[0:11000, [2,8]].values# 使用cpu disk预测cpu [2,3,8]cpu+mem+disk [2,6,7,8]cpu+neti+neto+disk
+        training_set = dataset_train.iloc[0:3400, [2,8]].values# 使用cpu disk预测cpu [2,3,8]cpu+mem+disk [2,6,7,8]cpu+neti+neto+disk
     elif resource == "mem":
         training_set = dataset_train.iloc[0:3325, 3:4].values
     elif resource == "disk":
@@ -121,8 +121,8 @@ def get_train_data(path, resource):
     # sliding window = 120
     # sliding window = 60
     # 3320 10000 19380
-    for i in range(120, 10000):# 3320
-        X_train.append(training_set_scaled[i - 120:i, :])# 输入为120*num_features
+    for i in range(60, 3340):# 3320
+        X_train.append(training_set_scaled[i - 60:i, :])# 输入为120*num_features
         ### 通过改变y的长度实现不同的prediction step
         y_train.append(training_set_scaled[[i,i+1], 0])# 输出为1*1 0:target为cpu 1:target为disk
     X_train, y_train = np.array(X_train), np.array(y_train)

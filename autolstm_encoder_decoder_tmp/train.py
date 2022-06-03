@@ -83,9 +83,9 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
             MAPE = mean_absolute_percentage_error(y_real, y_pred_)
             total_MAPE.append(MAPE)
             print('MAPE Value= ', MAPE)
-            if MAPE <= 0.11:
-                print("------ get a proper model ------")
-                torch.save(model, "../output/cpu_ps2_features2_MAPE"+str(MAPE)+"_epoch"+str(i+1)+".pth")
+            if MAPE <= 0.065:
+                print("------------ get a proper model ------------")
+                torch.save(model, "../output/ps2_hs4_MAPE"+str(MAPE)+"_epoch"+str(i+1)+".pth")
 
         # Visualising the results
         # if i == epochs - 1:
@@ -98,7 +98,7 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
         #     plt.show()
 
     ### save model
-    torch.save(model, save_pth)
+    # torch.save(model, save_pth)
     print("MSE min = ", min(total_MSE))
     print("MAPE min = ", min(total_MAPE))
     ### Visualising the losses
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
     batch_size = 20
-    epochs = 500
-    save_pth = '../output/' + 'cpu_ps2_' + resource + '_epoch_' + str(epochs) + '(CNN).pth'
+    epochs = 600
+    save_pth = '../output/' + 'tmp' + resource + '_epoch_' + str(epochs) + '.pth'
 
     train(data_pth, resource, batch_size, epochs, save_pth)
