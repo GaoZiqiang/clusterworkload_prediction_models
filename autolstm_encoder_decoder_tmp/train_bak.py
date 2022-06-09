@@ -19,27 +19,15 @@ from utils import *
 
 
 def train(data_pth, resource, batch_size, epochs, save_pth):
-    # for validate
-    predictions = []
-    reals = []
-
     # 指标
     total_MSE = []
     total_MAPE = []
-
     # 得到数据
     x, y = get_train_data(data_pth, resource)
-    test_data = x[1000:1040]
-    y_real = y[1000:1040]
-
+    test_data = x[:20]
+    y_real = y[:20]
     train_loader = Data.DataLoader(
         dataset=Data.TensorDataset(x, y),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
-        batch_size=batch_size,  # 每块的大小
-        shuffle=False,  # 要不要打乱数据 (打乱比较好?)
-        num_workers=2,  # 多进程（multiprocess）来读数据
-    )
-    test_loader = Data.DataLoader(
-        dataset=Data.TensorDataset(test_data, y_real),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
         batch_size=batch_size,  # 每块的大小
         shuffle=False,  # 要不要打乱数据 (打乱比较好?)
         num_workers=2,  # 多进程（multiprocess）来读数据
@@ -51,7 +39,7 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
     # model = LstmFcAutoEncoder()  # lstm+fc模型
     loss_function = nn.MSELoss()  # loss
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # 优化器
-
+    # epochs = 140
     # 开始训练
     model.train()
     for i in range(epochs):
@@ -72,31 +60,33 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
             single_loss.backward()
             optimizer.step()
             # print("Train Step:", i, " loss: ", single_loss)
-
-        # validate
-        for seq, labels in test_loader:
-            y_pred = model(seq)  # 压缩维度：得到输出，并将维度为1的去除
-            y_pred = y_pred[:, -1, :]  # 取window_size个预测值中的最后一个值
+        # 每20次，输出一次前20个的结果，对比一下效果
+        if (i + 1) % 1 == 0:
+            # embed()
+            y_pred = model(test_data)  # 压缩维度：得到输出，并将维度为1的去除
+            y_pred = y_pred[:, -1, :]# 取window_size个预测值中的最后一个值
+            # print("Train epoch: ", i)
+            # print("TEST: ", test_data)
+            # print("PRED: ", y_pred)
+            # print("LOSS: ", loss_function(y_pred, y_real))
+            # from IPython import embed
+            # embed()
+            # test_data_ = test_data.detach().numpy()
             y_pred_ = y_pred.detach().numpy()
 
-            # embed()
-            predictions.extend(y_pred_.squeeze())
-            reals.extend(labels.detach().numpy())
-
             # print("nn.MSELoss= ", loss_function(y_pred.squeeze(), labels))
-        MSE = mean_squared_error(predictions, reals)
-        total_MSE.append(MSE)
-        print('MSE Value= ', MSE)
-        # print('MSE2 Value= ', mean_squared_error(y_real, y_pred_))
-        print('MAE Value= ', mean_absolute_error(predictions, reals))
-        print('RMSE Value= ', sqrt(mean_squared_error(predictions, reals)))
-        MAPE = mean_absolute_percentage_error(reals, predictions)
-        total_MAPE.append(MAPE)
-        print('MAPE Value= ', MAPE)
-
-        if MAPE <= 0.065:
-            print("------------ get a proper model ------------")
-            torch.save(model, "../figures/" + str(MAPE) + "_epoch" + str(i + 1) + ".pth")
+            MSE = mean_squared_error(y_pred_, y_real)
+            total_MSE.append(MSE)
+            print('MSE Value= ', MSE)
+            # print('MSE2 Value= ', mean_squared_error(y_real, y_pred_))
+            print('MAE Value= ', mean_absolute_error(y_pred_, y_real))
+            print('RMSE Value= ', sqrt(mean_squared_error(y_pred_, y_real)))
+            MAPE = mean_absolute_percentage_error(y_real, y_pred_)
+            total_MAPE.append(MAPE)
+            print('MAPE Value= ', MAPE)
+            if MAPE <= 0.065:
+                print("------------ get a proper model ------------")
+                torch.save(model, "../output/ps2_hs4_MAPE"+str(MAPE)+"_epoch"+str(i+1)+".pth")
 
         # Visualising the results
         # if i == epochs - 1:

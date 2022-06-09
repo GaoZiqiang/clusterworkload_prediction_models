@@ -18,6 +18,10 @@ from utils import *
 
 
 def test(data_pth, resource, test_len, model_pth, batch_size):
+    # 用于plot
+    predictions = []
+    labels = []
+
     # 定义损失参数
     total_MSE = 0
     total_MAE = 0
@@ -32,8 +36,8 @@ def test(data_pth, resource, test_len, model_pth, batch_size):
 
     # 加载数据
     x, y = get_train_data(data_pth, resource)
-    test_data = x[:test_len]
-    y_real = y[:test_len]
+    test_data = x[2000:2200]
+    y_real = y[2000:2200]
     test_loader = Data.DataLoader(
         dataset=Data.TensorDataset(test_data, y_real),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
         batch_size=batch_size,  # 每块的大小
@@ -42,11 +46,17 @@ def test(data_pth, resource, test_len, model_pth, batch_size):
     )
 
     for inputs, targets in test_loader:
+        # 预测
         y_pred = test_model(inputs)  # 压缩维度：得到输出，并将维度为1的去除
         y_pred = y_pred[:, -1, :]
         y_pred_ = y_pred.detach().numpy()
         targets_ = targets.detach().numpy()
 
+        # embed()
+        predictions.extend(y_pred_.squeeze())
+        labels.extend(targets_)
+
+        # 预测指标
         MSE = mean_squared_error(y_pred_, targets_)
         MAE = mean_absolute_error(y_pred_, targets_)
         RMSE = sqrt(mean_squared_error(y_pred_, targets_))
@@ -71,6 +81,9 @@ def test(data_pth, resource, test_len, model_pth, batch_size):
     test_MAPE = total_MAPE / loader_len
     print("min_MAPE = ", min_MAPE)
 
+    # embed()
+    plot(predictions, labels)
+
     return test_MSE, test_MAE, test_RMSE, test_MAPE
 
 
@@ -78,14 +91,14 @@ if __name__ == '__main__':
     ### test
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
-    test_len = 20
-    model_name = 'preseq150_MAPE0.09985609_epoch320.pth'
-    model_pth = '../import_execellent_models/different_prediction_sequence_len/' + model_name
+    test_len = 60
+    model_name = 'MAPE0.05577706_epoch261.pth'
+    model_pth = '../output/' + model_name
     batch_size = 20
 
     MSE, MAE, RMSE, MAPE = test(data_pth, resource, test_len, model_pth, batch_size)
     print(MSE, MAE, RMSE, MAPE)
-    with open('../result_in_txt/results_train.txt', 'a') as file:
+    with open('../result_in_txt/results_test.txt', 'a') as file:
         file.write(
             'Date %s | model_name = %s | MSE = %.7f | MAE: %.7f | RMSE: %.7f | MAPE: %.7f |\n' % (
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), model_name, MSE, MAE, RMSE, MAPE))
