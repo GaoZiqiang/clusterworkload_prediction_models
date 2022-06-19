@@ -32,9 +32,9 @@ def get_train_data(path):
     # Creating a data structure with 60 timesteps and 1 output
     X_train = []
     y_train = []
-    for i in range(150, 3330):
-        X_train.append(training_set_scaled[i - 150:i, 0])
-        y_train.append(training_set_scaled[i, 0])
+    for i in range(120, 3320):
+        X_train.append(training_set_scaled[i - 120:i, 0])
+        y_train.append(training_set_scaled[[i,i+1,i+2,i+4,i+5,i+6], 0])
     X_train, y_train = np.array(X_train), np.array(y_train)
 
     # Reshaping
@@ -48,7 +48,7 @@ def get_train_data(path):
 
 
 class LstmAutoEncoder(nn.Module):
-    def __init__(self, input_layer=150, hidden_layer=100, output_layer=1, batch_size=20):
+    def __init__(self, input_layer=120, hidden_layer=100, output_layer=6, batch_size=20):
         super(LstmAutoEncoder, self).__init__()
 
         self.input_layer = input_layer
@@ -71,7 +71,7 @@ class LstmAutoEncoder(nn.Module):
 
 
 
-def train():
+def train(epochs):
     min_MAPE = 1
     min_MAPE_epoch = -1
     # 得到数据
@@ -90,7 +90,7 @@ def train():
     # model = LstmFcAutoEncoder()  # lstm+fc模型
     loss_function = nn.MSELoss()  # loss
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # 优化器
-    epochs = 600
+    # epochs = 1
     # 开始训练
     model.train()
     for i in range(epochs):
@@ -143,5 +143,6 @@ def train():
     # torch.save(model, './output/' + 'auto_encoder_' +'MAPE' + str(min_MAPE) +'_epoch' + str(epochs) + '.pth')
 
 if __name__ == '__main__':
-    train()
+    epoches = 800
+    train(epoches)
 
