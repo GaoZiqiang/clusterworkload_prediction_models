@@ -36,8 +36,8 @@ def test(data_pth, resource, test_len, model_pth, batch_size):
 
     # 加载数据
     x, y = get_train_data(data_pth, resource)
-    test_data = x[2000:2200]
-    y_real = y[2000:2200]
+    test_data = x[1000:1040]
+    y_real = y[1000:1040]
     test_loader = Data.DataLoader(
         dataset=Data.TensorDataset(test_data, y_real),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
         batch_size=batch_size,  # 每块的大小
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
     test_len = 60
-    model_name = 'MAPE0.05577706_epoch261.pth'
-    model_pth = '../output/' + model_name
+    model_name = '0.09770329_epoch3008.pth'
+    model_pth = '../figures/' + model_name
     batch_size = 20
 
     MSE, MAE, RMSE, MAPE = test(data_pth, resource, test_len, model_pth, batch_size)

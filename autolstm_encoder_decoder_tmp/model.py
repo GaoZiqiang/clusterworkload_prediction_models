@@ -31,7 +31,7 @@ class LstmAutoEncoder(nn.Module):
 
         # batch_size sliding_window features_num
         # input_x = input_x.view(20, 120, 2)
-        input_x = input_x.view(self.batch_size, 120, self.num_features)# batch_size slidingwindow feature数
+        input_x = input_x.view(self.batch_size, 90, self.num_features)# batch_size slidingwindow feature数
 
         # encoder
         # 输入形参
@@ -39,6 +39,7 @@ class LstmAutoEncoder(nn.Module):
         encoder_lstm, (n, c) = self.encoder_lstm(input_x,
                                                  (torch.zeros(self.num_directions*self.hidden_layers, self.batch_size, self.hidden_size),
                                                   torch.zeros(self.num_directions*self.hidden_layers, self.batch_size, self.hidden_size)))
+        # embed()
         # decoder
         decoder_lstm, (n, c) = self.decoder_lstm(encoder_lstm,
                                                  (torch.zeros(self.num_directions * self.hidden_layers, self.batch_size, self.output_features),

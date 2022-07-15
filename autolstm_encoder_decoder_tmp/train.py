@@ -24,12 +24,11 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
     reals = []
 
     # 指标
-    total_MSE = []
-    total_MAPE = []
-
+    min_MAPE = 1
+    min_MAPE_epoch = -1
     # 得到数据
     x, y = get_train_data(data_pth, resource)
-    test_data = x[1000:1040]
+    test_data = x[0:1040]
     y_real = y[1000:1040]
 
     train_loader = Data.DataLoader(
@@ -85,18 +84,21 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
 
             # print("nn.MSELoss= ", loss_function(y_pred.squeeze(), labels))
         MSE = mean_squared_error(predictions, reals)
-        total_MSE.append(MSE)
+
         print('MSE Value= ', MSE)
         # print('MSE2 Value= ', mean_squared_error(y_real, y_pred_))
         print('MAE Value= ', mean_absolute_error(predictions, reals))
         print('RMSE Value= ', sqrt(mean_squared_error(predictions, reals)))
         MAPE = mean_absolute_percentage_error(reals, predictions)
-        total_MAPE.append(MAPE)
         print('MAPE Value= ', MAPE)
+
+        if min_MAPE > MAPE:
+            min_MAPE = MAPE
+            min_MAPE_epoch = i + 1
 
         if MAPE <= 0.065:
             print("------------ get a proper model ------------")
-            torch.save(model, "../figures/" + str(MAPE) + "_epoch" + str(i + 1) + ".pth")
+            torch.save(model, "../figures/another_" + str(MAPE) + "_epoch" + str(i + 1) + ".pth")
 
         # Visualising the results
         # if i == epochs - 1:
@@ -110,8 +112,9 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
 
     ### save model
     # torch.save(model, save_pth)
-    print("MSE min = ", min(total_MSE))
-    print("MAPE min = ", min(total_MAPE))
+    print("min_MAPE = ", min_MAPE)
+    print("min_MAPE_epoch = ", min_MAPE_epoch)
+    torch.save(model, "../figures/" + "FINAL.pth")
     ### Visualising the losses
     # plt.plot(total_MSE, color='red', label='MSE loss')
     # plt.plot(total_MAPE, color='green', label='MAPE loss')
@@ -137,7 +140,7 @@ if __name__ == '__main__':
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
     batch_size = 20
-    epochs = 600
+    epochs = 4000
     save_pth = '../output/' + 'utils' + resource + '_epoch_' + str(epochs) + '.pth'
 
     train(data_pth, resource, batch_size, epochs, save_pth)

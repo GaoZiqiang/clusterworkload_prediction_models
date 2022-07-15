@@ -13,6 +13,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 
 import matplotlib.pyplot as plt
+import time
 
 from model import *
 from utils import *
@@ -79,14 +80,23 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
             total_MSE.append(MSE)
             print('MSE Value= ', MSE)
             # print('MSE2 Value= ', mean_squared_error(y_real, y_pred_))
-            print('MAE Value= ', mean_absolute_error(y_pred_, y_real))
-            print('RMSE Value= ', sqrt(mean_squared_error(y_pred_, y_real)))
+            MAE = mean_absolute_error(y_pred_, y_real)
+            print('MAE Value= ', MAE)
+            RMSE = sqrt(mean_squared_error(y_pred_, y_real))
+            print('RMSE Value= ', RMSE)
             MAPE = mean_absolute_percentage_error(y_real, y_pred_)
             total_MAPE.append(MAPE)
             print('MAPE Value= ', MAPE)
+
+            model_name = "cpu+disk"
+            with open('../result_in_txt/results_train.txt', 'a') as file:
+                file.write(
+                    'Date %s | model_name = %s | MSE = %.7f | MAE: %.7f | RMSE: %.7f | MAPE: %.7f |\n' % (
+                        time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), model_name, MSE, MAE, RMSE, MAPE))
+
             if MAPE <= 0.065:
                 print("------------ get a proper model ------------")
-                torch.save(model, "../output/ps2_hs4_MAPE"+str(MAPE)+"_epoch"+str(i+1)+".pth")
+                torch.save(model, "../output/disk+mem"+str(MAPE)+"_epoch"+str(i+1)+".pth")
 
         # Visualising the results
         # if i == epochs - 1:
