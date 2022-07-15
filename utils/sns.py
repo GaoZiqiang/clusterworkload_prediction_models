@@ -12,6 +12,6 @@ if __name__ == "__main__":
 
     ## 描述两变量相关性
     coeff = data.iloc[:, [1,2,3,6,7,8]].corr()  # 相关性
-    embed()
+    # embed()
     sns.heatmap(coeff)
     # embed()
