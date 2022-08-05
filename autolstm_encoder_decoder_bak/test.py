@@ -75,13 +75,13 @@ if __name__ == '__main__':
     data_pth = '../data/machine_usage.csv'
     resource = 'cpu'
     test_len = 200
-    model_name = 'auto_encoder_cpu_epoch_150.pth'
+    model_name = 'auto_encoder_cpu_epoch_5.pth'
     model_pth = '../output/' + model_name
     batch_size = 20
 
     MSE, MAE, RMSE, MAPE = test(data_pth, resource, test_len, model_pth, batch_size)
     print(MSE, MAE, RMSE, MAPE)
-    with open('../result_in_txt/results_train.txt', 'a') as file:
+    with open('../result_in_txt/results_test.txt', 'a') as file:
         file.write(
             'Date %s | model_name = %s | MSE = %.5f | MAE: %.5f | RMSE: %.5f | MAPE: %.5f |\n' % (
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), model_name, MSE, MAE, RMSE, MAPE))

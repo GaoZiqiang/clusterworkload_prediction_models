@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class LstmAutoEncoder(nn.Module):
-    def __init__(self, input_layer=120*3, hidden_layer=100, output_layer=1, batch_size=20):
+    def __init__(self, input_layer=120, hidden_layer=100, output_layer=1, batch_size=20):
         super(LstmAutoEncoder, self).__init__()
 
         self.input_layer = input_layer

@@ -32,7 +32,7 @@ def get_train_data(path, resource):
     dataset_train = pd.read_csv(path, error_bad_lines=False, sep="\t")
     training_set = []
     if resource == "cpu":
-        training_set = dataset_train.iloc[0:3325, 2:4].values / 100# 使用cpu mem预测cpu
+        training_set = dataset_train.iloc[0:3325, 2:3].values / 100
     elif resource == "mem":
         training_set = dataset_train.iloc[0:3325, 3:4].values / 100
     elif resource == "disk":
