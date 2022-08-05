@@ -35,7 +35,7 @@ def get_train_data(path, resource):
     # embed()
     training_set = []
     if resource == "cpu":
-        training_set = dataset_train.iloc[0:3325, [2,8]].values# 使用cpu disk预测cpu
+        training_set = dataset_train.iloc[0:3325, 2:3].values# 使用cpu disk预测cpu
     elif resource == "mem":
         training_set = dataset_train.iloc[0:3325, 3:4].values
     elif resource == "disk":
@@ -57,7 +57,7 @@ def get_train_data(path, resource):
     # sliding window = 120
     # sliding window = 60
     for i in range(120, 3320):
-        X_train.append(training_set_scaled[i - 120:i, :])# 输入为120*3
+        X_train.append(training_set_scaled[i - 120:i, :])# 输入为120*num_features
         y_train.append(training_set_scaled[i, 0])# 输出为1*1
     X_train, y_train = np.array(X_train), np.array(y_train)
 

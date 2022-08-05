@@ -31,10 +31,21 @@ def get_train_data():
     y = pd.Series(np.random.randint(0, 2, 2000))
     return get_tensor_from_pd(df).float(), get_tensor_from_pd(y).float()
 
-def get_train_data(path):
+def get_train_data(path, resource):
     # Importing the training set
     dataset_train = pd.read_csv(path, error_bad_lines=False, sep="\t")
-    training_set = dataset_train.iloc[0:3325, 2:3].values / 100
+    training_set = []
+    if resource == "cpu":
+        training_set = dataset_train.iloc[0:3325, 2:3].values / 100
+    elif resource == "mem":
+        training_set = dataset_train.iloc[0:3325, 3:4].values / 100
+    elif resource == "disk":
+        training_set = dataset_train.iloc[0:3325, 8:9].values / 100
+    elif resource == "net":
+        training_set = dataset_train.iloc[0:3325, 2:3].values / 100
+    else:
+        print("unknown resouce, return")
+        return
 
     # normalization
     sc = MinMaxScaler(feature_range=(0, 1))
@@ -113,16 +124,14 @@ class LstmFcAutoEncoder(nn.Module):
                                                   torch.zeros(1, 20, self.input_layer)))
         return decoder_lstm.squeeze()
 
-
-
-if __name__ == '__main__':
+def train(data_pth, resource, batch_size, epochs, save_pth):
     # 得到数据
-    x, y = get_train_data('./data/machine_usage.csv')
+    x, y = get_train_data(data_pth, resource)
     test_data = x[:20]
     y_real = y[:20]
     train_loader = Data.DataLoader(
         dataset=Data.TensorDataset(x, y),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
-        batch_size=20,  # 每块的大小
+        batch_size=batch_size,  # 每块的大小
         shuffle=False,  # 要不要打乱数据 (打乱比较好)
         num_workers=2,  # 多进程（multiprocess）来读数据
     )
@@ -132,11 +141,11 @@ if __name__ == '__main__':
     # model = LstmFcAutoEncoder()  # lstm+fc模型
     loss_function = nn.MSELoss()  # loss
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # 优化器
-    epochs = 5
+    # epochs = 140
     # 开始训练
     model.train()
     for i in range(epochs):
-        print("===>Epoch: ", i)
+        print("===>Epoch: ", i + 1)
         for seq, labels in train_loader:
             optimizer.zero_grad()
             # embed()
@@ -147,8 +156,8 @@ if __name__ == '__main__':
             single_loss.backward()
             optimizer.step()
             # print("Train Step:", i, " loss: ", single_loss)
-		# 每20次，输出一次前20个的结果，对比一下效果
-        if (i+1) % 5 == 0:
+        # 每20次，输出一次前20个的结果，对比一下效果
+        if (i + 1) % 5 == 0:
             # embed()
             y_pred = model(test_data).squeeze()  # 压缩维度：得到输出，并将维度为1的去除
             # print("Train epoch: ", i)
@@ -175,5 +184,77 @@ if __name__ == '__main__':
         #     plt.legend()
         #     plt.show()
 
-    torch.save(model, './output/' + 'auto_encoder1.pth')
+    torch.save(model, save_pth)
 
+def test(data_pth, resource, test_len, model_pth, batch_size):
+    # 定义损失参数
+    total_MSE = 0
+    total_MAE = 0
+    total_RMSE = 0
+    total_MAPE = 0
+
+    # 加载模型
+    # model_pth = "../output/auto_encoder_epoch140.pth"
+    test_model = torch.load(model_pth,map_location = torch.device('cpu'))
+    test_model.eval()
+
+    # 加载数据
+    x, y = get_train_data(data_pth, resource)
+    test_data = x[:test_len]
+    y_real = y[:test_len]
+    test_loader = Data.DataLoader(
+        dataset=Data.TensorDataset(test_data, y_real),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
+        batch_size=batch_size,  # 每块的大小
+        shuffle=False,  # 要不要打乱数据 (打乱比较好)
+        num_workers=2,  # 多进程（multiprocess）来读数据
+    )
+
+    for inputs, targets in test_loader:
+        y_pred = test_model(inputs).squeeze()  # 压缩维度：得到输出，并将维度为1的去除
+        y_pred_ = y_pred.detach().numpy()
+        targets_ = targets.detach().numpy()
+
+        MSE = mean_squared_error(y_pred_, targets_)
+        MAE = mean_absolute_error(y_pred_, targets_)
+        RMSE = sqrt(mean_squared_error(y_pred_, targets_))
+        MAPE = mean_absolute_percentage_error(y_pred_, targets_)
+
+        # print('MSE Value= ', MSE)
+        # print('MAE Value= ', MAE)
+        # print('RMSE Value= ', RMSE)
+        # print('MAPE Value= ', MAPE)
+
+        total_MSE += MSE
+        total_MAE += MAE
+        total_RMSE += RMSE
+        total_MAPE += MAPE
+
+    loader_len = len(test_loader)
+    # embed()
+    test_MSE = total_MSE / loader_len
+    test_MAE = total_MAE / loader_len
+    test_RMSE = total_RMSE / loader_len
+    test_MAPE = total_MAPE / loader_len
+
+    return test_MSE, test_MAE, test_RMSE, test_MAPE
+
+
+if __name__ == '__main__':
+    ### train
+    # data_pth = '../data/machine_usage.csv'
+    # resource = 'cpu'
+    # batch_size = 20
+    # epochs = 10
+    # save_pth = '../output/' + 'auto_encoder_cpu_epoch_10.pth'
+    #
+    # train(data_pth, resource, batch_size, epochs, save_pth)
+
+    ### test
+    data_pth = '../data/machine_usage.csv'
+    resource = 'cpu'
+    test_len = 200
+    model_pth = '../output/' + 'auto_encoder_cpu_epoch_10.pth'
+    batch_size = 20
+
+    MSE, MAE, RMSE, MAPE = test(data_pth, resource, test_len, model_pth, batch_size)
+    print(MSE, MAE, RMSE, MAPE)

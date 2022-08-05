@@ -19,8 +19,8 @@ from utils import *
 def train(data_pth, resource, batch_size, epochs, save_pth):
     # 得到数据
     x, y = get_train_data(data_pth, resource)
-    test_data = x[:120]
-    y_real = y[:120]
+    test_data = x[:20]
+    y_real = y[:20]
     train_loader = Data.DataLoader(
         dataset=Data.TensorDataset(x, y),  # 封装进Data.TensorDataset()类的数据，可以为任意维度
         batch_size=batch_size,  # 每块的大小
@@ -45,8 +45,10 @@ def train(data_pth, resource, batch_size, epochs, save_pth):
             optimizer.zero_grad()
             # embed()
             y_pred = model(seq)  # 压缩维度：得到输出，并将维度为1的去除
-            y_pred = y_pred[:, -1, :]
+            # print("in train(), y_pred.shape = ", y_pred.shape)
+            y_pred = y_pred[:, -1, :]# 中间维度只取最后一个的
             # y_pred = model(seq)
+            # embed()
             single_loss = loss_function(y_pred.squeeze(), labels)# 将y_pred由[20,1]转换为[20]
             # 若想要获得类别，二分类问题使用四舍五入的方法即可：print(torch.round(y_pred))
             single_loss.backward()
