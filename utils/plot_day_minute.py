@@ -23,7 +23,7 @@ def data_plt(path, resource):
     # embed()
     training_set = []
     if resource == "cpu":
-        training_set = dataset_train.iloc[1000:1060, [2]].values# 使用cpu disk预测cpu
+        training_set = dataset_train.iloc[1000:1500, [2]].values# 使用cpu disk预测cpu
     elif resource == "mem":
         training_set = dataset_train.iloc[0:3325, 3:4].values
     elif resource == "disk":
@@ -69,18 +69,18 @@ def data_plt(path, resource):
     # embed()
 
     ### Visualising the losses
-    plt.plot(training_set, "b--", label='ground_truth')
-    plt.plot(pred_set, "r", label='OurModel')
-    plt.plot(LSTM_set, "g", label='LSTM')
-    plt.plot(TCN_set, "orange", label='TCN')
-    plt.plot(AutoEncoder_set, "purple", label='AutoEncoder')
+    plt.plot(training_set, "b")
+    # plt.plot(pred_set, "r", label='OurModel')
+    # plt.plot(LSTM_set, "g", label='LSTM')
+    # plt.plot(TCN_set, "orange", label='TCN')
+    # plt.plot(AutoEncoder_set, "purple", label='AutoEncoder')
     # plt.plot(training_set, color='green', label='MAPE loss')
     # plt.title('training losses')
-    plt.xticks(fontsize=15)
-    plt.yticks(fontsize=15)
-    plt.xlabel('Minute', fontsize=20)
-    plt.ylabel('CPU Usage', fontsize=20)
-    plt.legend(fontsize=15)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    # plt.xlabel('Minute', fontsize=20)
+    plt.ylabel('CPU Usage', fontsize=10)
+    plt.legend(fontsize=10)
     plt.show()
 
 def plot(pred, true):
