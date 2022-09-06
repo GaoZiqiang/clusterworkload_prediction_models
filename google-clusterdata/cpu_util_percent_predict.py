@@ -11,18 +11,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from IPython import embed
 #%%
 
 # Importing the training set
-dataset_train = pd.read_csv('./data/machine_usage.csv',error_bad_lines=False, sep ="\t")
-training_set = dataset_train.iloc[:, 2:3].values
+dataset_train = pd.read_csv('/home/gaoziqiang/PycharmProjects/google_data/result.csv',error_bad_lines=False, sep =" ")
+training_set = dataset_train.iloc[:, 1:2].values
 # training_set.shape
 # training_set
 
 #%%
 
 dataset_train.head()
-
+# embed()
 #%%
 
 # Feature Scaling
@@ -35,7 +36,7 @@ training_set_scaled = sc.fit_transform(training_set)
 # Creating a data structure with 60 timesteps and 1 output
 X_train = []
 y_train = []
-for i in range(60, 20000):
+for i in range(60, 300000):
     X_train.append(training_set_scaled[i-60:i, 0])
     y_train.append(training_set_scaled[i, 0])
 X_train, y_train = np.array(X_train), np.array(y_train)
@@ -93,7 +94,7 @@ regressor.add(Dense(units = 1))
 regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor.fit(X_train, y_train, epochs = 60, batch_size = 32)
+regressor.fit(X_train, y_train, epochs = 10, batch_size = 16)
 
 
 
@@ -102,9 +103,9 @@ regressor.fit(X_train, y_train, epochs = 60, batch_size = 32)
 # Part 3 - Making the predictions and visualising the results
 
 # Getting the real stock price of 2017
-dataset_test = pd.read_csv('./data/test.csv',error_bad_lines=False, sep ="\t")
+dataset_test = pd.read_csv('/home/gaoziqiang/PycharmProjects/google_data/result.csv',error_bad_lines=False, sep =" ")
 # dataset_test = pd.read_csv('data/test.csv', error_bad_lines=False, sep ="\t")
-real_stock_price = dataset_test.iloc[:, 2:3].values
+real_stock_price = dataset_test.iloc[0:201, 1:2].values
 # real_stock_price.shape
 # dataset_test.head()
 
@@ -116,7 +117,7 @@ inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 X_test = []
-for i in range(60, 71):
+for i in range(60, 260):
     X_test.append(inputs[i-60:i, 0])
 X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
